@@ -2,10 +2,13 @@ package gstring
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 	"unsafe"
 
+	"github.com/aimey-a/go-tools/gmath"
 	"github.com/aimey-a/go-tools/gtype"
 )
 
@@ -113,4 +116,150 @@ func BytesToStr(b []byte) string {
 // 字符串格式化
 func Format(format string, args ...any) string {
 	return fmt.Sprintf(format, args...)
+}
+
+//切割数据  {1,1,1},{1,1}  类型
+func ExactCutting(str string) []*gtype.StringKeyValue {
+	attList := []*gtype.StringKeyValue{}
+	for {
+		a := IndexOf(str, "{")
+		if a != -1 {
+			att := &gtype.StringKeyValue{}
+			b := IndexOf(str, "}")
+			s := string([]rune(str)[a+1 : b])
+			index := 0
+			for {
+				d := IndexOf(s, ",")
+				if d != -1 {
+					if index == 0 {
+						e := string([]rune(s)[:d])
+						att.Key = ToNumber[int](e)
+						index++
+					} else {
+						e := string([]rune(s)[:d])
+						att.Value = ToNumber[int](e)
+						index++
+					}
+				} else if index == 1 {
+					e := string([]rune(s)[d+1:])
+					att.Value = ToNumber[int](e)
+					att.Weight = -1
+					break
+				} else {
+					if index == 0 {
+					} else {
+						att.Weight = ToNumber[int](s)
+					}
+					break
+				}
+				s = string([]rune(s)[d+1:])
+			}
+			attList = append(attList, att)
+			if len(str) > b+2 {
+				str = string([]rune(str)[b+2:])
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	return attList
+}
+
+// 切割数据  {1,1,1},{1,1} 类型 已结算概率
+func ExactCuttingDropProbability(str string) []*gtype.StringKeyValue {
+	attList := []*gtype.StringKeyValue{}
+	attProbabilityList := []*gtype.StringKeyValue{}
+	probabilityValue := 0
+	for {
+		a := strings.Index(str, "{")
+		if a != -1 {
+			att := &gtype.StringKeyValue{}
+			b := strings.Index(str, "}")
+			s := string([]rune(str)[a+1 : b])
+			index := 0
+			probability := true
+			bk := true
+			for {
+				d := strings.Index(s, ",")
+				if d != -1 {
+					if index == 0 {
+						e := string([]rune(s)[:d])
+						att.Key = ToNumber[int](e)
+						index++
+					} else {
+						e := string([]rune(s)[:d])
+						att.Value = ToNumber[int](e)
+						index++
+					}
+				} else if index == 1 {
+					e := string([]rune(s)[d+1:])
+					att.Value = ToNumber[int](e)
+					att.Weight = -1
+					probability = false
+					break
+				} else {
+					if index == 0 {
+						bk = false
+					} else {
+						att.Weight = ToNumber[int](s)
+					}
+					break
+				}
+				s = string([]rune(s)[d+1:])
+			}
+			if bk {
+				if probability {
+					attProbabilityList = append(attProbabilityList, att)
+					probabilityValue += att.Weight
+				} else {
+					attList = append(attList, att)
+				}
+			}
+			if len(str) > b+2 {
+				str = string([]rune(str)[b+2:])
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	rand.Seed(time.Now().UnixNano())
+	rate := gmath.RandInt(0, probabilityValue+1)
+	drop := DropProbability(attProbabilityList, probabilityValue, rate)
+	if drop != nil {
+		attList = append(attList, drop)
+	}
+	return attList
+}
+
+// 概率处理  data 值  probability 概率  rate 随机值
+func DropProbability(data []*gtype.StringKeyValue, probability, rate int) *gtype.StringKeyValue {
+	rateNum := 0
+	if probability == 0 {
+		if len(data) > 0 {
+			return data[0]
+		} else {
+			return nil
+		}
+	}
+	if len(data) == 1 {
+		return data[0]
+	}
+	for _, v := range data {
+		if v.Weight+rateNum > rate {
+			if v.Key != 0 && v.Value != 0 {
+				info := &gtype.StringKeyValue{}
+				info.Key = v.Key
+				info.Value = v.Value
+				info.Weight = v.Weight
+				return info
+			}
+		} else {
+			rateNum += v.Weight
+		}
+	}
+	return nil
 }

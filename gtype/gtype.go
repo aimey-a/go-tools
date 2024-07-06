@@ -9,3 +9,12 @@ type BaseTypeNumber interface {
 type BaseTypeString interface {
 	~string | ~[]byte | ~[]rune
 }
+
+type StringKeyValue struct {
+	//主键
+	Key int
+	//值
+	Value int
+	//权重
+	Weight int
+}
