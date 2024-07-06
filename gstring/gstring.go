@@ -8,6 +8,7 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/aimey-a/go-tools/gcollect"
 	"github.com/aimey-a/go-tools/gmath"
 	"github.com/aimey-a/go-tools/gtype"
 )
@@ -119,44 +120,59 @@ func Format(format string, args ...any) string {
 }
 
 //切割数据  {1,1,1},{1,1}  类型
-func ExactCutting(str string) []*gtype.StringKeyValue {
-	attList := []*gtype.StringKeyValue{}
+func ExactCutting(str string, decollatorStr ...string) (attList []*gtype.StringKeyValue) {
+	strRune := []rune(str)
+	openingBrace := []rune("{")[0]
+	ClosingBrace := []rune("}")[0]
+	//切割符
+	var decollator rune
+	if len(decollatorStr) > 0 {
+		decollator = []rune(decollatorStr[0])[0]
+	} else {
+		decollator = []rune(",")[0]
+	}
 	for {
-		a := IndexOf(str, "{")
-		if a != -1 {
+		opening := gcollect.IndexForAny(strRune, openingBrace)
+		if opening != -1 {
 			att := &gtype.StringKeyValue{}
-			b := IndexOf(str, "}")
-			s := string([]rune(str)[a+1 : b])
+			att.Weight = -1
+			closing := gcollect.IndexForAny(strRune, ClosingBrace)
+			if opening+1 > closing {
+				fmt.Println("失败", opening, closing)
+				return
+			}
+			s := strRune[opening+1 : closing]
 			index := 0
 			for {
-				d := IndexOf(s, ",")
-				if d != -1 {
-					if index == 0 {
-						e := string([]rune(s)[:d])
-						att.Key = ToNumber[int](e)
-						index++
-					} else {
-						e := string([]rune(s)[:d])
-						att.Value = ToNumber[int](e)
-						index++
+				decollatorIndex := gcollect.IndexForAny(s, decollator)
+				if decollatorIndex != -1 {
+					val := string(s[:decollatorIndex])
+					switch index {
+					case 0:
+						att.Key = ToNumber[int](val)
+					case 1:
+						att.Value = ToNumber[int](val)
+					case 2:
+						att.Weight = ToNumber[int](val)
 					}
-				} else if index == 1 {
-					e := string([]rune(s)[d+1:])
-					att.Value = ToNumber[int](e)
-					att.Weight = -1
-					break
+					index++
 				} else {
-					if index == 0 {
-					} else {
-						att.Weight = ToNumber[int](s)
+					val := string(s[decollatorIndex+1:])
+					switch index {
+					case 0:
+						att.Key = ToNumber[int](val)
+					case 1:
+						att.Value = ToNumber[int](val)
+					case 2:
+						att.Weight = ToNumber[int](val)
 					}
 					break
 				}
-				s = string([]rune(s)[d+1:])
+				s = s[decollatorIndex+1:]
 			}
 			attList = append(attList, att)
-			if len(str) > b+2 {
-				str = string([]rune(str)[b+2:])
+			if len(strRune) > closing+2 {
+				strRune = strRune[closing+2:]
 			} else {
 				break
 			}
@@ -164,61 +180,71 @@ func ExactCutting(str string) []*gtype.StringKeyValue {
 			break
 		}
 	}
-	return attList
+	return
 }
 
 // 切割数据  {1,1,1},{1,1} 类型 已结算概率
-func ExactCuttingDropProbability(str string) []*gtype.StringKeyValue {
-	attList := []*gtype.StringKeyValue{}
-	attProbabilityList := []*gtype.StringKeyValue{}
-	probabilityValue := 0
+func ExactCuttingProbability(str string, decollatorStr ...string) (attList []*gtype.StringKeyValue) {
+	strRune := []rune(str)
+	openingBrace := []rune("{")[0]
+	ClosingBrace := []rune("}")[0]
+	//切割符
+	var decollator rune
+	if len(decollatorStr) > 0 {
+		decollator = []rune(decollatorStr[0])[0]
+	} else {
+		decollator = []rune(",")[0]
+	}
+	var probabilityValue = 0
+	var attProbabilityList []*gtype.StringKeyValue
 	for {
-		a := strings.Index(str, "{")
-		if a != -1 {
+		opening := gcollect.IndexForAny(strRune, openingBrace)
+		if opening != -1 {
 			att := &gtype.StringKeyValue{}
-			b := strings.Index(str, "}")
-			s := string([]rune(str)[a+1 : b])
+			att.Weight = -1
+			closing := gcollect.IndexForAny(strRune, ClosingBrace)
+			if opening+1 > closing {
+				fmt.Println("失败", opening, closing)
+				return
+			}
+			s := strRune[opening+1 : closing]
 			index := 0
-			probability := true
-			bk := true
 			for {
-				d := strings.Index(s, ",")
-				if d != -1 {
-					if index == 0 {
-						e := string([]rune(s)[:d])
-						att.Key = ToNumber[int](e)
-						index++
-					} else {
-						e := string([]rune(s)[:d])
-						att.Value = ToNumber[int](e)
-						index++
+				decollatorIndex := gcollect.IndexForAny(s, decollator)
+				if decollatorIndex != -1 {
+					val := string(s[:decollatorIndex])
+					switch index {
+					case 0:
+						att.Key = ToNumber[int](val)
+					case 1:
+						att.Value = ToNumber[int](val)
+					case 2:
+						att.Weight = ToNumber[int](val)
 					}
-				} else if index == 1 {
-					e := string([]rune(s)[d+1:])
-					att.Value = ToNumber[int](e)
-					att.Weight = -1
-					probability = false
-					break
+					index++
 				} else {
-					if index == 0 {
-						bk = false
-					} else {
-						att.Weight = ToNumber[int](s)
+					val := string(s[decollatorIndex+1:])
+					switch index {
+					case 0:
+						att.Key = ToNumber[int](val)
+					case 1:
+						att.Value = ToNumber[int](val)
+					case 2:
+						att.Weight = ToNumber[int](val)
 					}
 					break
 				}
-				s = string([]rune(s)[d+1:])
+				s = s[decollatorIndex+1:]
 			}
-			if bk {
-				if probability {
-					attProbabilityList = append(attProbabilityList, att)
-					probabilityValue += att.Weight
-				} else {
-					attList = append(attList, att)
-				}
+			if att.Weight > -1 {
+				attProbabilityList = append(attProbabilityList, att)
+				probabilityValue += att.Weight
+			} else {
+				attList = append(attList, att)
 			}
-			if len(str) > b+2 {
-				str = string([]rune(str)[b+2:])
+
+			if len(strRune) > closing+2 {
+				strRune = strRune[closing+2:]
 			} else {
 				break
 			}
@@ -228,15 +254,15 @@ func ExactCuttingDropProbability(str string) []*gtype.StringKeyValue {
 	}
 	rand.Seed(time.Now().UnixNano())
 	rate := gmath.RandInt(0, probabilityValue+1)
-	drop := DropProbability(attProbabilityList, probabilityValue, rate)
+	drop := Probability(attProbabilityList, probabilityValue, rate)
 	if drop != nil {
 		attList = append(attList, drop)
 	}
-	return attList
+	return
 }
 
 // 概率处理  data 值  probability 概率  rate 随机值
-func DropProbability(data []*gtype.StringKeyValue, probability, rate int) *gtype.StringKeyValue {
+func Probability(data []*gtype.StringKeyValue, probability, rate int) *gtype.StringKeyValue {
 	rateNum := 0
 	if probability == 0 {
 		if len(data) > 0 {
