@@ -289,3 +289,27 @@ func Probability(data []*gtype.StringKeyValue, probability, rate int) *gtype.Str
 	}
 	return nil
 }
+
+//根据分隔符和拼接符 将字符串首字母大小写
+//str 数据  concatenator 拼接符  LowerOrUpper 是否大小写 true 为小写 false 文瑞大写   decollatorList 分隔符
+func CapitalizeSndSplice(str, concatenator string, LowerOrUpper bool, decollatorList ...string) string {
+	var decollator string
+	if len(decollatorList) > 0 {
+		decollator = decollatorList[0]
+	} else {
+		decollator = " "
+	}
+	b := strings.Split(str, decollator)
+	var c strings.Builder // 使用 strings.Builder 来提高性能
+	for i, v := range b {
+		if LowerOrUpper {
+			c.WriteString(strings.ToLower(v))
+		} else {
+			c.WriteString(strings.ToUpper(v))
+		}
+		if i != len(b)-1 {
+			c.WriteString(concatenator)
+		}
+	}
+	return c.String()
+}
