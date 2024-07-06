@@ -160,3 +160,8 @@ func ZeroTime[T gtype.BaseTypeNumber](timestamp ...T) T {
 func Format[T gtype.BaseTypeNumber](timestamp T, format string) string {
 	return ToTime(timestamp).Format(format)
 }
+
+//输入时间 返回耗时
+func Since(t time.Time) time.Duration {
+	return time.Since(t)
+}
