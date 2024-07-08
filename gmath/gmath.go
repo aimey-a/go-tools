@@ -24,7 +24,8 @@ func MinValue[T gtype.BaseTypeNumber](a T, b T) T {
 
 // 随机数
 //	min: 左区间
-//	max: 右区间
+//	max: 右区间 (不包含)
+//[)
 func RandInt(min int, max int) int {
 	if min >= max {
 		return max
