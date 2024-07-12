@@ -1,2 +1,7 @@
 main.go
+*.sh
+*.cmd
+*.exe
+*.bat
+*.json
 .*
