@@ -313,3 +313,50 @@ func CapitalizeSndSplice(str, concatenator string, LowerOrUpper bool, decollator
 	}
 	return c.String()
 }
+
+// 去除超字符集
+func RemovehyIllegalCharacter(name string) string {
+	playerName := ""
+	runes := []rune(name)
+	rule := true
+	for i := 0; i < len(runes); i++ {
+		r := runes[i]
+		if len([]byte(string(r))) < 4 {
+			if r != 32 {
+				playerName += string(r)
+			}
+		}
+	}
+	if rule && len(playerName) != len(name) {
+		if playerName == "" {
+			rule = false
+		}
+	}
+	return playerName
+}
+
+//替换超字符集
+func ReplaceIllegalCharacter(name string) string {
+	playerName := ""
+	runes := []rune(name)
+	rule := true
+	for i := 0; i < len(runes); i++ {
+		r := runes[i]
+		ok := false
+		if len([]byte(string(r))) < 4 {
+			if r != 32 {
+				ok = true
+				playerName += string(r)
+			}
+		}
+		if !ok {
+			playerName += "?"
+		}
+	}
+	if rule && len(playerName) != len(name) {
+		if playerName == "" {
+			rule = false
+		}
+	}
+	return playerName
+}
