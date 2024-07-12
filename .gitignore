@@ -5,3 +5,5 @@ main.go
 *.bat
 *.json
 .*
+main*
+*pem
