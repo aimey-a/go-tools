@@ -291,7 +291,7 @@ func Probability(data []*gtype.StringKeyValue, probability, rate int) *gtype.Str
 }
 
 //根据分隔符和拼接符 将字符串首字母大小写
-//str 数据  concatenator 拼接符  LowerOrUpper 是否大小写 true 为小写 false 文瑞大写   decollatorList 分隔符
+//str 数据  concatenator 拼接符  LowerOrUpper 是否大小写 true为小写 false为大写   decollatorList 分隔符
 func CapitalizeSndSplice(str, concatenator string, LowerOrUpper bool, decollatorList ...string) string {
 	var decollator string
 	if len(decollatorList) > 0 {
