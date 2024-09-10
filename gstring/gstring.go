@@ -25,6 +25,7 @@ func ToString[T gtype.BaseTypeNumber](itr T) string {
 }
 
 // 保留指定位数的小数（参数为float32或float64）（默认保留两位小数）
+//
 //	fixed: 指定小数点位数
 func ToFixed(float any, fixed ...int) string {
 	tfixed := 2
@@ -44,6 +45,7 @@ func ToFixed(float any, fixed ...int) string {
 }
 
 // 字符串分割
+//
 //	sep: 分割符
 func Split(str string, sep string) []string {
 	return strings.Split(str, sep)
@@ -119,7 +121,7 @@ func Format(format string, args ...any) string {
 	return fmt.Sprintf(format, args...)
 }
 
-//切割数据  {1,1,1},{1,1}  类型
+// 切割数据  {1,1,1},{1,1}  类型
 func ExactCutting(str string, decollatorStr ...string) (attList []*gtype.StringKeyValue) {
 	strRune := []rune(str)
 	openingBrace := []rune("{")[0]
@@ -290,8 +292,8 @@ func Probability(data []*gtype.StringKeyValue, probability, rate int) *gtype.Str
 	return nil
 }
 
-//根据分隔符和拼接符 将字符串首字母大小写
-//str 数据  concatenator 拼接符  LowerOrUpper 是否大小写 true为小写 false为大写   decollatorList 分隔符
+// 根据分隔符和拼接符 将字符串首字母大小写
+// str 数据  concatenator 拼接符  LowerOrUpper 是否大小写 true为小写 false为大写   decollatorList 分隔符
 func CapitalizeSndSplice(str, concatenator string, LowerOrUpper bool, decollatorList ...string) string {
 	var decollator string
 	if len(decollatorList) > 0 {
@@ -335,7 +337,7 @@ func RemovehyIllegalCharacter(name string) string {
 	return playerName
 }
 
-//替换超字符集
+// 替换超字符集
 func ReplaceIllegalCharacter(name string) string {
 	playerName := ""
 	runes := []rune(name)

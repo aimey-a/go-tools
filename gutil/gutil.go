@@ -48,7 +48,7 @@ func Paging[T gtype.BaseTypeNumber, R gtype.BaseTypeNumber](pageNumber, pageSize
 	return R(((pageNumber - 1) * pageSize) + (i + 1))
 }
 
-//验证电子邮件
+// 验证电子邮件
 func ValidateEmail(str string) bool {
 	// 定义电子邮件的正则表达式
 	pattern := `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
